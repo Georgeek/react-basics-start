@@ -1,30 +1,34 @@
+const path = require('path');
+
 module.exports = {
     entry: './src/App.jsx',
 
     output: {
         filename: 'bundle.js',
-        path: './public',
-    },
-
-    devServer: {
-        inline: true,
-        contentBase: './public',
-        port: 3000
+        path: path.resolve(__dirname, 'public'),
     },
 
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.jsx?$/,
                 exclude: /node_modules/,
-                loaders: ['babel-loader']
+                use: [
+                    'react-hot-loader',
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            presets: ['es2015', 'react']
+                        }
+                    }
+                ]
             }
         ]
     },
 
-    devtool: 'eval-source-map',
+    devtool: 'cheap-eval-source-map',
     
     resolve: {
-        extensions: ['', '.js', '.jsx']
+        extensions: ['.js', '.jsx', '.json', '*']
     }
 };
