@@ -3,50 +3,51 @@ import React from 'react';
 import Button from './Button';
 
 class Form extends React.Component {
-	constructor(props) {
-		super(props);
+    constructor(props) {
+        super(props);
 
-		this.state = {
-			title: ''
-		};
+        this.state = {
+            title: ''
+        };
 
-		this.handleSubmit = this.handleSubmit.bind(this);
-		this.handleChange = this.handleChange.bind(this);
-	}
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleChange = this.handleChange.bind(this);
+    }
 
-	handleSubmit(event) {
-		event.preventDefault();
-		let title = this.state.title;
+    handleSubmit(event) {
+        event.preventDefault();
 
-		if (title) {
-			this.props.onAdd(title);
-			this.setState({ title: '' });
-		}
-	}
+        const title = this.state.title;
 
-	handleChange(event) {
-		let title = event.target.value;
+        if (title) {
+            this.props.onAdd(title);
+            this.setState({ title: '' });
+        }
+    }
 
-		this.setState({ title });
-	}
+    handleChange(event) {
+        const title = event.target.value;
 
-	render() {
-		return (
-			<form className="todo-form" onSubmit={this.handleSubmit}>
-				<input
-					type="text"
-					value={this.state.title}
-					placeholder="Что нужно сделать?"
-					onChange={this.handleChange} />
+        this.setState({ title });
+    }
 
-				<Button type="submit"> Добавить </Button>
-			</form>
-		);
-	}
+    render() {
+        return(
+            <form className="todo-add-form" onSubmit={this.handleSubmit}>
+                <input
+                    type="text"
+                    value={this.state.title}
+                    placeholder="Что нужно сделать?"
+                    onChange={this.handleChange} />
+
+                <Button type="submit">Добавить</Button>
+            </form>
+        );
+    }
 }
 
 Form.propTypes = {
-	onAdd: React.PropTypes.func.isRequired
+    onAdd: React.PropTypes.func.isRequired
 };
 
 export default Form;

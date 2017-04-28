@@ -1,117 +1,131 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import axios from 'axios';
 
 import todos from './todos';
 import Header from './components/Header';
 import Todo from './components/Todo';
-import Form from './components/Form'
+import Form from './components/Form';
 
 class App extends React.Component {
-	constructor(props) {
-		super(props);
+    constructor(props) {
+        super(props);
 
-		this.state = {
-			todos: this.props.initiallData
-		};
+        this.state = {
+            todos: []
+        };
 
-		this.handleStatusChange = this.handleStatusChange.bind(this);
-		this.handleAdd = this.handleAdd.bind(this);
-		this.handleDelete = this.handleDelete.bind(this);
-		this.handleEdit = this.handleEdit.bind(this);
-	}
+        this.handleAdd = this.handleAdd.bind(this);
+        this.handleDelete = this.handleDelete.bind(this);
+        this.handleToggle = this.handleToggle.bind(this);
+        this.handleEdit = this.handleEdit.bind(this);
+    }
 
-	nexId() {
-		this._nextId = this._nextId || 4;
-		return this._nextId++
-	}
-	
-	handleStatusChange(id) {
-		let todos = this.state.todos.map(todo => {
-			if(todo.id === id) {
-				todo.completed = !todo.completed;
-			}
+    componentDidMount() {
+        axios.get('/api/todos')
+            .then(res => res.data)
+            .then(todos => this.setState({ todos }))
+            .catch(this.handleError);
+    }
 
-			return todo;
-		});
+    handleAdd(title) {
+        axios.post('/api/todos', { title })
+            .then(res => res.data)
+            .then(todo => {
+                const todos = [...this.state.todos, todo];
 
-		this.setState({ todos });
-	}
+                this.setState({ todos });
+            })
+            .catch(this.handleError);
 
-	handleAdd(title) {
-		let todo = {
-			id: this.nexId(),
-			title,
-			completed: false
-		};
+    } 
 
-		let todos = [...this.state.todos, todo];
+    handleDelete(id) {
+        axios.delete(`/api/todos/${id}`)
+            .then(() => {
+                const todos = this.state.todos.filter(todo => todo.id !== id);
 
-		this.setState({ todos });
-	}
+                this.setState({ todos });
+            })
+            .catch(this.handleError);
+    }
 
-	handleDelete(id) {
-		let todos = this.state.todos.filter(todo => todo.id !== id);
+    handleToggle(id) {
+        axios.patch(`/api/todos/${id}`)
+            .then(res => {
+                const todos = this.state.todos.map(todo => {
+                    if (todo.id === id) {
+                        todo = res.data;
+                    }
 
-		this.setState({ todos });
-	}
+                    return todo;
+                });
 
-	handleEdit(id, title) {
-		let todos = this.state.todos.map(todo => {
-			if (todo.id === id) {
-				todo.title = title;
-			}
+                this.setState({ todos });
+            })
+            .catch(this.handleError);
+    }
 
-			return todo;
-		});
+    handleEdit(id, title) {
+        axios.put(`/api/todos/${id}`, { title })
+            .then(res => {
+                const todos = this.state.todos.map(todo => {
+                    if (todo.id === id) {
+                        todo = res.data;
+                    }
 
-		this.setState({ todos });
-	}
+                    return todo;
+                });
 
-	render() {
-		return (
-			<main>
-				<Header title={this.props.title} todos={this.state.todos} />
+                this.setState({ todos });
+            })
+            .catch(this.handleError);
+    }
 
-				<ReactCSSTransitionGroup
-					component="section"
-					className="todo-list"
-					transitionName="slide"
-					transitionAppear={true}
-					transitionAppearTimeout={500}
-					transitionEnterTimeout={500}
-					transitionLeaveTimeout={500}>
-					{this.state.todos.map(todo => // с помощью map мы перебираем массив todos (напоминание себе)
-						<Todo 
-							key={todo.id}
-							id={todo.id}
-							title={todo.title}
-							completed={todo.completed}
-							onStatusChange={this.handleStatusChange} 
-							onDelete={this.handleDelete}
-							onEdit={this.handleEdit}
-						/>)
-					}
-				</ReactCSSTransitionGroup>
+    handleError(error) {
+        console.error(error);
+    }
 
-				<Form onAdd={this.handleAdd} />
-			</main>
-		);
-	}
+    render() {
+        return (
+            <main>
+                <Header todos={this.state.todos} />
 
+                <ReactCSSTransitionGroup
+                    component="section"
+                    className="todo-list"
+                    transitionName="slide"
+                    transitionAppear={true}
+                    transitionAppearTimeout={500}
+                    transitionEnterTimeout={500}
+                    transitionLeaveTimeout={500}
+                    >
+                    {this.state.todos.map(todo => 
+                        <Todo
+                            key={todo.id}
+                            id={todo.id}
+                            title={todo.title}
+                            completed={todo.completed}
+                            onDelete={this.handleDelete}
+                            onToggle={this.handleToggle}
+                            onEdit={this.handleEdit}
+                        />)
+                    }
+                </ReactCSSTransitionGroup>
+
+                <Form onAdd={this.handleAdd} />
+            </main>
+        );
+    }
 }
 
 App.propTypes = {
-	title: React.PropTypes.string,
-	initiallData: React.PropTypes.arrayOf(React.PropTypes.shape({ // Можно передать object, но мы передаем shape
-		id: React.PropTypes.number.isRequired,
-		title: React.PropTypes.string.isRequired,			// который позволяет для каждого элемента объета
-		completed: React.PropTypes.bool.isRequired		// определить желаемый тип элемента
-	})).isRequired
+    initialData: React.PropTypes.arrayOf(React.PropTypes.shape({
+        id: React.PropTypes.number.isRequired,
+        title: React.PropTypes.string.isRequired,
+        completed: React.PropTypes.bool.isRequired
+    })).isRequired
 };
 
-App.defaultProps = {
-	title: "React ToDo"
-};
-
-ReactDOM.render(<App initiallData={todos} />, document.getElementById('root')); // испортируемый массив указываем в App
+ReactDOM.render(<App initialData={todos} />, document.getElementById('root'));

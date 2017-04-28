@@ -1,23 +1,18 @@
 {
-  "name": "react-todo",
+  "name": "react-basics",
   "version": "1.0.0",
-  "description": "React Todo application",
+  "description": "Исходный код для курса Основы React",
   "scripts": {
-    "start": "webpack-dev-server",
+    "start": "webpack-dev-server --inline --hot --content-base ./public",
     "build": "webpack -p"
   },
-  "babel": {
-    "presets": [
-      "es2015",
-      "react"
-    ]
-  },
   "dependencies": {
+    "axios": "^0.16.1",
     "body-parser": "1.17.1",
     "express": "4.15.2",
     "react": "15.4.2",
-    "react-dom": "15.4.2",
-    "react-addons-css-transition-group": "^15.4.2"
+    "react-addons-css-transition-group": "^15.5.2",
+    "react-dom": "15.4.2"
   },
   "devDependencies": {
     "babel-core": "6.23.1",
